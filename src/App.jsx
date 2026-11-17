@@ -4,6 +4,7 @@ import { LETTERS_BUCKET, supabase } from './lib/supabase.js';
 const EMPTY_FORM = { title: '', body: '', file: null };
 const ACCEPTED_FILES = '.pdf,.doc,.docx,.odt,.txt,.rtf,.jpg,.jpeg,.png,.webp,.gif';
 const USERNAME_PATTERN = /^[a-z0-9][a-z0-9._-]{2,23}$/;
+const LOGO_PATH = `${import.meta.env.BASE_URL}logo.gif`;
 
 function usernameToAuthEmail(username) {
   return `${username.toLowerCase()}@users.carwed.invalid`;
@@ -293,7 +294,7 @@ function App() {
     return (
       <main className="setup-screen">
         <div className="setup-card">
-          <div className="brand-mark">C</div>
+          <img className="brand-logo" src={LOGO_PATH} alt="Logo de Cartas" />
           <p className="eyebrow">ARCHIVO PRIVADO</p>
           <h1>Conecta tu espacio</h1>
           <p>Agrega la URL y la clave pública de tu proyecto Supabase en un archivo <code>.env</code>.</p>
@@ -312,7 +313,7 @@ function App() {
     return (
       <main className="login-screen">
         <section className="login-art" aria-label="Archivo de cartas">
-          <div className="art-top"><span className="brand-mark">C</span><span>UN LUGAR PARA TUS PALABRAS</span></div>
+          <div className="art-top"><img className="brand-logo" src={LOGO_PATH} alt="" /><span>UN LUGAR PARA TUS PALABRAS</span></div>
           <div className="letter-illustration" aria-hidden="true">
             <div className="paper paper-back" />
             <div className="paper paper-front">
@@ -373,7 +374,7 @@ function App() {
     <main className="app-shell">
       <header className="topbar">
         <a className="wordmark" href="#" onClick={(event) => { event.preventDefault(); setIsWriting(false); setSelectedId(letters[0]?.id ?? null); }}>
-          <span className="brand-mark small-mark">C</span>
+          <img className="brand-logo small-logo" src={LOGO_PATH} alt="" />
           <span>cartas<span className="wordmark-dot">.</span></span>
         </a>
         <div className="topbar-right">
