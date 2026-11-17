@@ -11,20 +11,22 @@ Aplicación web en español para guardar cartas escritas o archivos adjuntos. La
 
 1. Instala las dependencias con `npm install`.
 2. En Supabase, abre **SQL Editor**, pega y ejecuta [`supabase/schema.sql`](./supabase/schema.sql).
-3. Abre la aplicación y regístrate con el correo que usarás como administrador. Para darle el rol de administrador, copia su UID desde **Authentication → Users** y ejecuta esta consulta en **SQL Editor**, reemplazando el UID de ejemplo:
+3. En Supabase, abre **Authentication → Sign In / Providers → Email** y desactiva **Confirm email**. Confirma también que **Allow new users to sign up** esté activado. El sistema usa nombres de usuario sin enviar correos; por eso la confirmación debe estar desactivada.
+4. Abre la aplicación y regístrate con el nombre de usuario que usarás como administrador. Para asignarle el rol, reemplaza `miusuario` en esta consulta por tu nombre de usuario (en minúsculas) y ejecútala en **SQL Editor**:
 
    ```sql
    UPDATE auth.users
    SET raw_app_meta_data =
      COALESCE(raw_app_meta_data, '{}'::jsonb) || '{"role":"admin"}'::jsonb
-   WHERE id = 'PEGA-AQUI-EL-UID'::uuid
+   WHERE email = 'miusuario@users.carwed.invalid'
    RETURNING id, raw_app_meta_data;
    ```
 
-   Verifica que el resultado contenga `"role": "admin"` y vuelve a iniciar sesión. No asignes este rol a las cuentas lectoras; las cuentas creadas desde el registro reciben solo permisos de lectura.
-4. En Supabase, confirma que el registro por correo esté permitido en los ajustes de **Authentication** (opción **Allow new users to sign up**). Las personas pueden crear su propia cuenta desde **Regístrate** en la aplicación. Si la confirmación de correo está activada, deberán confirmar su dirección antes de iniciar sesión.
+   Verifica que el resultado contenga `"role": "admin"` y vuelve a iniciar sesión. Si ya tenías una cuenta administradora con correo, crea una cuenta nueva con nombre de usuario y asígnale el rol; después de comprobar el acceso puedes eliminar la cuenta antigua. No asignes el rol a las cuentas lectoras.
 5. Copia `.env.example` a `.env` y completa la URL y la clave `anon`/publicable del proyecto (las encontrarás en **Project Settings → API**).
 6. Ejecuta `npm run dev` y abre la dirección local que muestra Vite.
+
+Supabase Auth no ofrece nombres de usuario directamente. La aplicación convierte cada nombre en un identificador interno con formato `usuario@users.carwed.invalid`; no es una dirección real ni se usa para enviar correos. Los nombres deben tener entre 3 y 24 letras, números, puntos, guiones o guiones bajos. No hay recuperación automática de contraseña; una persona administradora debe restablecerla desde Supabase.
 
 ## Publicar con GitHub Pages
 
@@ -37,7 +39,7 @@ El workflow [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml) com
    - `VITE_SUPABASE_ANON_KEY`: la clave publicable (`anon`/publishable), nunca la clave `service_role`.
 4. En GitHub, ve a **Settings → Pages** y selecciona **GitHub Actions** como origen de publicación.
 5. En VS Code, haz un cambio, escribe un mensaje en **Source Control** y pulsa **Commit**, luego **Sync Changes** (o **Push**). En GitHub, abre la pestaña **Actions** y espera a que **Build and deploy to GitHub Pages** termine correctamente.
-6. La dirección del sitio aparece en **Settings → Pages** y en el resultado del workflow. En **Supabase → Authentication → URL Configuration**, configura **Site URL** con esa dirección. Si usas confirmación por correo, agrega también esa dirección a las URL de redirección permitidas.
+6. La dirección del sitio aparece en **Settings → Pages** y en el resultado del workflow. En **Supabase → Authentication → URL Configuration**, configura **Site URL** con esa dirección.
 
 El workflow construye el sitio con la ruta correcta para un repositorio de proyecto de GitHub Pages. No subas el archivo `.env`; los secretos de Actions se usan durante la compilación. Los archivos de cartas permanecen en el bucket privado de Supabase.
 

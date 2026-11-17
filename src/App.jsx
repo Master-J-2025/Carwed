@@ -3,6 +3,11 @@ import { LETTERS_BUCKET, supabase } from './lib/supabase.js';
 
 const EMPTY_FORM = { title: '', body: '', file: null };
 const ACCEPTED_FILES = '.pdf,.doc,.docx,.odt,.txt,.rtf,.jpg,.jpeg,.png,.webp,.gif';
+const USERNAME_PATTERN = /^[a-z0-9][a-z0-9._-]{2,23}$/;
+
+function usernameToAuthEmail(username) {
+  return `${username.toLowerCase()}@users.carwed.invalid`;
+}
 
 function formatDate(value) {
   return new Intl.DateTimeFormat('es', {
@@ -25,7 +30,7 @@ function App() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [authMode, setAuthMode] = useState('login');
 
@@ -101,27 +106,45 @@ function App() {
 
   async function signIn(event) {
     event.preventDefault();
+    const normalizedUsername = username.trim().toLowerCase();
+    if (!USERNAME_PATTERN.test(normalizedUsername)) {
+      setError('El usuario debe tener entre 3 y 24 caracteres: letras, números, punto, guion o guion bajo.');
+      return;
+    }
+
     setBusy(true);
     setError('');
     setNotice('');
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: usernameToAuthEmail(normalizedUsername),
+      password,
+    });
     if (signInError) setError(signInError.message);
     setBusy(false);
   }
 
   async function signUp(event) {
     event.preventDefault();
+    const normalizedUsername = username.trim().toLowerCase();
+    if (!USERNAME_PATTERN.test(normalizedUsername)) {
+      setError('El usuario debe tener entre 3 y 24 caracteres: letras, números, punto, guion o guion bajo.');
+      return;
+    }
+
     setBusy(true);
     setError('');
     setNotice('');
-    const { data, error: signUpError } = await supabase.auth.signUp({ email, password });
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email: usernameToAuthEmail(normalizedUsername),
+      password,
+      options: { data: { username: normalizedUsername } },
+    });
     if (signUpError) {
       setError(signUpError.message);
     } else if (data.session) {
       setNotice('Tu cuenta está lista. Ya puedes leer las cartas.');
     } else {
-      setAuthMode('login');
-      setNotice('Cuenta creada. Revisa tu correo para confirmar la dirección y luego inicia sesión.');
+      setError('Supabase todavía exige confirmar un correo. La persona administradora debe desactivar la confirmación de correo antes de crear cuentas.');
     }
     setBusy(false);
   }
@@ -320,8 +343,8 @@ function App() {
                 : 'Regístrate para leer las cartas. Las cuentas nuevas tienen acceso de solo lectura.'}
             </p>
             <form onSubmit={authMode === 'login' ? signIn : signUp} className="login-form">
-              <label htmlFor="email">Correo electrónico</label>
-              <input id="email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+              <label htmlFor="username">Nombre de usuario</label>
+                <input id="username" type="text" autoComplete="username" minLength={3} maxLength={24} pattern="[A-Za-z0-9][A-Za-z0-9._-]{2,23}" title="Usa de 3 a 24 letras, números, puntos, guiones o guiones bajos." value={username} onChange={(event) => setUsername(event.target.value)} required />
               <label htmlFor="password">Contraseña</label>
               <input id="password" type="password" autoComplete={authMode === 'login' ? 'current-password' : 'new-password'} minLength={authMode === 'signup' ? 6 : undefined} value={password} onChange={(event) => setPassword(event.target.value)} required />
               {error && <p className="message error-message" role="alert">{error}</p>}
@@ -354,7 +377,7 @@ function App() {
           <span>cartas<span className="wordmark-dot">.</span></span>
         </a>
         <div className="topbar-right">
-          <span className="user-email">{session.user.email}</span>
+          <span className="user-email">{session.user.user_metadata?.username ?? 'Administrador/a'}</span>
           <button className="text-button" onClick={signOut}>Cerrar sesión <span aria-hidden="true">↗</span></button>
         </div>
       </header>
