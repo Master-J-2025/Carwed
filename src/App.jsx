@@ -502,7 +502,7 @@ function App() {
             </article>
           ) : (
             <div className="welcome-state">
-              <div className="welcome-seal">C</div>
+              <img className="welcome-logo" src={LOGO_PATH} alt="Logo de Cartas" />
               <p className="eyebrow">{search ? 'SIN RESULTADOS' : 'TU ARCHIVO PRIVADO'}</p>
               <h2>{search ? 'No encontramos esa carta.' : 'Un espacio para las palabras.'}</h2>
               <p>{search ? 'Prueba con otro título o una palabra de la carta.' : 'Las cartas aparecerán aquí para que puedas leerlas con calma.'}</p>

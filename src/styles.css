@@ -157,7 +157,7 @@ button:disabled { cursor: wait; opacity: .65; }
 .toast.success-message { border-color: #dce5d8; background: #f8fbf5; }
 .toast button { flex: none; border: 0; background: none; color: #777; font-size: 18px; }
 .welcome-state { align-self: center; width: min(100%, 390px); padding: 20px 0 55px; text-align: center; }
-.welcome-seal { display: grid; place-items: center; width: 67px; height: 67px; margin: 0 auto 25px; border: 1px solid #dfe3d9; border-radius: 50%; color: var(--green); font: 34px var(--serif); }
+.welcome-logo { display: block; width: 84px; height: 84px; margin: 0 auto 18px; object-fit: contain; }
 .welcome-state h2 { margin: 13px 0 9px; font: 31px/1.2 var(--serif); font-weight: 400; }
 .welcome-state > p:not(.eyebrow) { margin: 0 auto 21px; color: #92968a; font-size: 11px; line-height: 1.7; }
 
